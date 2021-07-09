@@ -2,7 +2,7 @@ const socket = io('/')
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer(undefined, {
   host: 'khobragade-video-chat-server.herokuapp.com',
-  port:'21104'
+  port:'9000'
 })
 const myVideo = document.createElement('video')
 myVideo.muted = true
