@@ -4,8 +4,8 @@ const server = require('http').Server(app)
 const io = require('socket.io')(server)
 const { v4: uuidV4 } = require('uuid')
 
-hostName = process.env.HOST_URL || ''
-hostPort = process.env.HOST_PORT || 1234
+const { PeerServer } = require('peer');
+const peerServer = PeerServer({ port: 3001, path: '/peerjs' });
 
 app.set('view engine', 'ejs')
 app.use(express.static('public'))
