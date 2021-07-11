@@ -2,6 +2,8 @@ const socket = io('/')
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer()
 
+let isMute = true
+
 const myVideo = document.createElement('video')
 myVideo.muted = true
 const peers = {}
@@ -10,6 +12,8 @@ navigator.mediaDevices.getUserMedia({
   audio: true
 }).then(stream => {
   addVideoStream(myVideo, stream)
+
+  stream.muted = isMute
 
   myPeer.on('call', call => {
     call.answer(stream)
@@ -56,9 +60,5 @@ function addVideoStream(video, stream) {
 const muteCheckbox = document.getElementById("mute");
 
 muteCheckbox.addEventListener('change', function () {
-  if (this.checked) {
-    myVideo.muted = false
-  } else {
-    myVideo.muted = true
-  }
+  isMute = !isMute
 });
