@@ -24,7 +24,6 @@ function addVideoStream(video, stream) {
   videoGrid.append(video)
 }
 
-let isMute = false
 
 //Capturing our stream data
 navigator.mediaDevices.getUserMedia({
@@ -68,9 +67,25 @@ navigator.mediaDevices.getUserMedia({
   //When muted
   document.getElementById("mute").addEventListener('change', function () {
     if(this.checked){
-      isMute = !isMute
       
       ourStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+
+      Object.keys(peers).forEach(userId => {
+        const oldCall = peers[userId]
+        oldCall.close()
+  
+        const call = myPeer.call(userId, ourStream)
+  
+        const video = document.createElement('video')
+        call.on('stream', userVideoStream => {
+          addVideoStream(video, userVideoStream)
+        })
+  
+        call.on('close', () => {
+          video.remove()
+        })
+      });
+    }else{
 
       Object.keys(peers).forEach(userId => {
         const oldCall = peers[userId]
