@@ -2,8 +2,8 @@ const socket = io('/')
 const videoGrid = document.getElementById('video-grid')
 const myPeer = new Peer()
 
-let isAudio = false
-let isVideo = false
+let isAudio = true
+let isVideo = true
 
 const myVideo = document.createElement('video')
 myVideo.muted = true  //intially our video is muted
@@ -12,22 +12,36 @@ const peers = {}
 navigator.mediaDevices.getUserMedia({
   video: isVideo,
   audio: isAudio
-}).then(stream => {
-  addVideoStream(myVideo, stream) //attach our video to our screen
+}).then(ourStream => {
+  addVideoStream(myVideo, ourStream) //attach our video to our screen
 
-  myPeer.on('call', call => {
-    call.answer(stream)
+  myPeer.on('call', call => { //when remote peer attempts to call you
+    call.answer(ourStream)  // answer call send our stream
 
     const video = document.createElement('video')
-    
-    call.on('stream', userVideoStream => {
+
+    call.on('stream', userVideoStream => {  //listern peer upcoming stream
       addVideoStream(video, userVideoStream) //attach incoming video
     })
+
   })
 
   socket.on('user-connected', userId => {
-    connectToNewUser(userId, stream)
+    const call = myPeer.call(userId, ourStream)
+    
+    const video = document.createElement('video')
+    call.on('stream', userVideoStream => {
+      addVideoStream(video, userVideoStream)
+    })
+
+    call.on('close', () => {
+      video.remove()
+    })
+
+    peers[userId] = call
   })
+}).catch(err=>{
+  alert(err.message)
 })
 
 socket.on('user-disconnected', userId => {
@@ -38,18 +52,6 @@ myPeer.on('open', id => {
   socket.emit('join-room', ROOM_ID, id)
 })
 
-function connectToNewUser(userId, stream) {
-  const call = myPeer.call(userId, stream)
-  const video = document.createElement('video')
-  call.on('stream', userVideoStream => {
-    addVideoStream(video, userVideoStream)
-  })
-  call.on('close', () => {
-    video.remove()
-  })
-
-  peers[userId] = call
-}
 
 function addVideoStream(video, stream) {
   video.srcObject = stream
