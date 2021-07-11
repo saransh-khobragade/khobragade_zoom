@@ -24,15 +24,17 @@ function addVideoStream(video, stream) {
   videoGrid.append(video)
 }
 
-let isMute = true
+let isMute = false
 
-//SENDING
-socket.on('user-connected', userId => {
+//Capturing our stream data
+navigator.mediaDevices.getUserMedia({
+  video: true,
+  audio: true
+}).then(ourStream => {
 
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: isMute
-  }).then(ourStream => {
+  //SENDING
+  socket.on('user-connected', userId => {
+
     addVideoStream(myVideo, ourStream)
     const call = myPeer.call(userId, ourStream)
 
@@ -46,47 +48,50 @@ socket.on('user-connected', userId => {
     })
 
     peers[userId] = call
+
   })
 
-})
 
-
-//RECIEVING
-myPeer.on('call', call => { //when remote peer attempts to call you
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: isMute
-  }).then(ourStream => {
+  //RECIEVING
+  myPeer.on('call', call => { 
     addVideoStream(myVideo, ourStream)
     call.answer(ourStream)  // answer call send our stream
-
+  
     const video = document.createElement('video')
-
+  
     call.on('stream', userVideoStream => {  //listern peer upcoming stream
       addVideoStream(video, userVideoStream) //attach incoming video
     })
   })
+  
 
+  //When muted
+  document.getElementById("mute").addEventListener('change', function () {
+    if(this.checked){
+      isMute = !isMute
+      
+      ourStream.getAudioTracks().forEach(track => track.enabled = !track.enabled);
+
+      Object.keys(peers).forEach(userId => {
+        const oldCall = peers[userId]
+        oldCall.close()
+  
+        const call = myPeer.call(userId, ourStream)
+  
+        const video = document.createElement('video')
+        call.on('stream', userVideoStream => {
+          addVideoStream(video, userVideoStream)
+        })
+  
+        call.on('close', () => {
+          video.remove()
+        })
+      });
+    }
+  })
 })
 
 
-document.getElementById("mute").addEventListener('change', function () {
-  isMute = !isMute
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: isMute
-  }).then(ourStream => {
-    Object.keys(peers).forEach(userId => {
-      const call = myPeer.call(userId, ourStream)
-  
-      const video = document.createElement('video')
-      call.on('stream', userVideoStream => {
-        addVideoStream(video, userVideoStream)
-      })
 
-      call.on('close', () => {
-        video.remove()
-      })
-    });
-  })
-});
+
+
