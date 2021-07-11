@@ -7,7 +7,7 @@ const { PeerServer } = require('peer');
 const peerServer = PeerServer({ port: 3001, path: '/peerjs' });
 
 const shortUuid = ()=>{
-  return Math.random().toString(36).slice(-6);
+  return Math.random().toString(36).slice(-3);
 }
 
 app.set('view engine', 'ejs')
