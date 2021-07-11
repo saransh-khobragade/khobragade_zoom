@@ -61,6 +61,9 @@ navigator.mediaDevices.getUserMedia({
     call.on('stream', userVideoStream => {  //listern peer upcoming stream
       addVideoStream(video, userVideoStream) //attach incoming video
     })
+    call.on('close', () => {
+      video.remove()
+    })
   })
   
 
