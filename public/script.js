@@ -52,3 +52,13 @@ function addVideoStream(video, stream) {
   })
   videoGrid.append(video)
 }
+
+const muteCheckbox = document.getElementById("mute");
+
+muteCheckbox.addEventListener('change', function () {
+  if (this.checked) {
+    myVideo.muted = false
+  } else {
+    myVideo.muted = true
+  }
+});
