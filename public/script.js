@@ -71,7 +71,7 @@ navigator.mediaDevices.getUserMedia({
   document.getElementById("mute").addEventListener('change', function () {
     if(this.checked){
       
-      //ourStream.getAudioTracks().forEach(track => track.enabled = false);
+      ourStream.getAudioTracks().forEach(track => track.enabled = false);
       ourStream.muted = !ourStream.muted 
       Object.keys(peers).forEach(userId => {
         const oldCall = peers[userId]
@@ -90,8 +90,7 @@ navigator.mediaDevices.getUserMedia({
       });
     }else{
 
-      ourStream.muted = !ourStream.muted 
-      //ourStream.getAudioTracks().forEach(track => track.enabled = true);
+      ourStream.getAudioTracks().forEach(track => track.enabled = true);
       Object.keys(peers).forEach(userId => {
         const oldCall = peers[userId]
         oldCall.close()
