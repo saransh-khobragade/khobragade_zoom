@@ -31,10 +31,11 @@ navigator.mediaDevices.getUserMedia({
   audio: true
 }).then(ourStream => {
 
+  addVideoStream(myVideo, ourStream)
+
   //SENDING
   socket.on('user-connected', userId => {
 
-    addVideoStream(myVideo, ourStream)
     const call = myPeer.call(userId, ourStream)
 
     const video = document.createElement('video')
@@ -53,7 +54,7 @@ navigator.mediaDevices.getUserMedia({
 
   //RECIEVING
   myPeer.on('call', call => { 
-    addVideoStream(myVideo, ourStream)
+    
     call.answer(ourStream)  // answer call send our stream
   
     const video = document.createElement('video')
