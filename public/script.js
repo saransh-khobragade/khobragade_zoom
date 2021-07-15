@@ -110,6 +110,50 @@ navigator.mediaDevices.getUserMedia({
       });
     }
   })
+
+
+  //When camera stopped
+  document.getElementById("camera").addEventListener('change', function () {
+    if(this.checked){
+      
+      ourStream.getVideoTracks().forEach(track => track.enabled = false);
+      ourStream.muted = !ourStream.muted 
+      Object.keys(peers).forEach(userId => {
+        const oldCall = peers[userId]
+        oldCall.close()
+  
+        const call = myPeer.call(userId, ourStream)
+  
+        const video = document.createElement('video')
+        call.on('stream', userVideoStream => {
+          addVideoStream(video, userVideoStream)
+        })
+  
+        call.on('close', () => {
+          video.remove()
+        })
+      });
+    }else{
+
+      ourStream.getVideoTracks().forEach(track => track.enabled = true);
+      Object.keys(peers).forEach(userId => {
+        const oldCall = peers[userId]
+        oldCall.close()
+  
+        
+        const call = myPeer.call(userId, ourStream)
+  
+        const video = document.createElement('video')
+        call.on('stream', userVideoStream => {
+          addVideoStream(video, userVideoStream)
+        })
+  
+        call.on('close', () => {
+          video.remove()
+        })
+      });
+    }
+  })
 })
 
 
